@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 
-RAM = 1024
-CPU = 1
+RAM = 2024
+CPU = 2
 IP = "10.0.0.10"
 Vagrant.configure("2") do |config|
   config.vm.box = "ainakikisagbe/nginx"
