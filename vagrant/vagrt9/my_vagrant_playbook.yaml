@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    #- name: Enable EPEL
+    #  yum: name=epel-release state=present
+    - name: ensure nginx is at the latest version
+      # ceci est pour ubuntu ou distribution linux avec apt comme installeur
+      apt: name=nginx state=latest  
+      # ci-dessous est pour centos
+      #yum: name=nginx state=latest 
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+        

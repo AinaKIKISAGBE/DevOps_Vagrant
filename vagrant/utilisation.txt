@@ -1,0 +1,614 @@
+
+
+##### vagrt1
+
+# ouvrir powershell
+
+# afficher la version
+vagrant --version
+
+# afficher les commandes
+vagrant list-commands
+
+# pour afficher le help d'une commande
+vagrant <command> --help
+# ou 
+vagrant <command> -h
+
+# afficher une vue globale de ce qui a été installé par vagrant
+vagrant global-status
+
+##### lab1
+# creer un dossier vagrt1
+mkdir vagrt1
+cd vagrt1
+ls
+
+# on va initialiser vagrant avec une image ubuntu que je souhaite utiliser: les imlages vagrant sont disponible sur le cloud vagrant https://app.vagrantup.com/boxes/search
+
+#vagrant init ubuntu/trusty64
+vagrant init ubuntu/xenial64
+
+# cette commande a créé un vagrantFile (fichier de configuration) dans notre dossier un peu comme l'utilisation d'un dockerfile pour docker
+
+# on va lancer la création de notre ressource 
+vagrant up
+
+# voir les ressources céée selon mon dossier source ou je me situe actuellement. on verra qu'il y a une vm default en running 
+vagrant status
+
+# pour voir tous les processus géré par vagrant et non pas uniquement celui concernant les dossier ou je me trouve alors ajoutter global 
+vagrant global-status 
+
+# on va essayer de s'y connecter en faisant vagrant ssh, par defaut il a déjà créé un utilisateur vagrant en utilisant un tunel de connection clé privé clé public
+
+vagrant ssh 
+
+# on peut se déconnecter en faisant 
+exit
+
+# nettoyer ma console 
+cls
+
+# arreter la VM (l'éteindre) 
+vagrant halt 
+
+# on peu aussion suprimer la vm avec destroy 
+vagrant destroy -f
+# l'option -f permet de forcer la destruction sinon le destroy allait nous demander Yesy or No si in est sur de vouloir suprimer la VM. avec l'option -f, il ne nous demande plus cela car on le force à supprimer sant nous demander.
+
+
+
+
+
+
+### vagrt2
+
+############ vagrant boxes ( xential, trusty, ... . ce sont les images ubuntu ou autre os préparé  l'avance sur le vagrant cloud 
+
+# installation de vagrant box 
+vagrant box add --name myubuntu1 url_image_vagrant_cloud/url_.xbox 
+# ou si on veut avoir acès aux méta données 
+vagrant box add --name myubuntu1 url_image_vagrant_cloud
+# ou utiliser directement de le nom de l'image sur vagrant cloud et prendre la dernière mise à jour 
+
+vagrant box add ubuntu/xenial64 
+
+# ou choisir une version spécifique
+vagrant box add ubuntu/xenial64  --box-version=20211001.0.0
+
+###
+cd vagrt2
+
+# on initialise une version spécifique 
+vagrant init ubuntu/xenial64 --box-version=20211001.0.0
+
+# si on veux afficher les commandes ou sous option, on peu feir -h et lire la documentation 
+#> vagrant init ubuntu/xenial64 -h
+
+vagrant up
+vagrant status
+vagrant global-status
+vagrant ssh 
+
+# notons que vagrant a les droit sudo 
+# on va faire une mise à jour 
+sudo apt-get update
+
+# on va installer nginx pour notre test 
+sudo apt-get install nginx -y
+
+# demarrer le service nginx avec systemctl 
+sudo systemctl start nginx 
+sudo systemctl status nginx
+
+# si erreur alors il n'est pas encore dans les service de systemctl, alors on va utiliser une ancienne méthode pour l'instant :
+#>	sudo service nginx start  
+#>	sudo service nginx enable
+#>	sudo service nginx status
+
+
+# on peu vérifier la page par défaut de nginx 
+curl 127.0.0.1
+
+# maintenant on va publier notre image vbox linux configuré à notre sauce sur le cloud vagrant pour que n'import qui puisse l'utliser et donc avec ngix déja installé par défaut et qui démmare au démarage de linux 
+
+#> aller créer un compte sur vagrant cloud 
+
+#> créer le nom de l'image sur vagrant cloud 
+# https://eazytraining.fr/cours/vagrant-pour-devops-creez-rapidement-et-facilement-vos-environnements-de-travail/lessons/lab-2-creation-du-repo-vagrant-box/
+
+# definir le provider (virtualbox) sur vagrant cloud
+#> https://eazytraining.fr/cours/vagrant-pour-devops-creez-rapidement-et-facilement-vos-environnements-de-travail/lessons/lab-2-creation-de-la-vbox/
+
+# on par sur powershell pour créer le fichier nginx.box à uploader sur vagrant 
+	# on sort du ssh pour se retrouver dans le dossier vagrt2 
+exit
+	# ensuite on crée le fichier  
+vagrant package --output nginx.box
+# cette commande va utiliser la vm dans ce dossier pour en créer une vbox file
+
+# ensuite j'upload manuelement le fichier sur mon vagrant cloud 
+#> https://eazytraining.fr/cours/vagrant-pour-devops-creez-rapidement-et-facilement-vos-environnements-de-travail/lessons/lab-2-upload-du-vagrant-box/
+si erreur, alors aller dans version et faire edit de la virtualbox provider présent s'il y est déjà
+
+# publier l'image en cliquand sur release sur le vagrant cloud afin que l'image soit public et accessible à tous.
+#> https://eazytraining.fr/cours/vagrant-pour-devops-creez-rapidement-et-facilement-vos-environnements-de-travail/lessons/lab-2-release-de-la-vagrant-box/
+
+# suprimer la VM . le faire souvent quand on a fini avec sauf si c'est une proviion permanente et non temporaire 
+
+vagrant destroy -f 
+
+# suprimer le fichier nginx.box sur dans mon répertoir 
+rm ./nginx.box 
+
+
+
+####### vagrt3 
+###### créer un vagrantfile et le monitorer pour qu'il face automatiquement les taches que l'on a réalisé ce dessus 
+
+# creer un vagrantfile qu'on va modivier par la suite
+cd ..
+mkdir vagrt3 
+cd vagrt3
+vagrant init
+# ou un mini fichier avec :vagrant init -m 
+
+# modifier manuellement le fichier 
+"""
+RAM = 2048
+CPU = 2
+Vagrant.configure("2") do |config|
+  config.vm.box = "geerlingguy/centos7"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = RAM # 2048
+    v.cpus = CPU # 2
+  end
+end
+"""
+
+#> pour vérifier (sans lancer) si le code de mon vagrantfile est correcte, exécuter < vagrant validate > dans powershell
+vagrant validate
+
+# on lance la crzation de la VM
+vagrant up
+
+# on y accede en ssh
+vagrant ssh
+
+# on install nginx 
+sudo yum install nginx 
+sudo systemctl status nginx 
+sudo systemctl start nginx 
+sudo systemctl status nginx 
+
+curl 127.0.0.1
+exit 
+
+# on suprime la vm 
+vagrant destroy -f 
+
+
+### vagrt4
+
+### les réseaux : on a 3 types : Port Forward , private network et public network 
+
+# on peut ajouter un Port Forward 
+Vagrant.configure("2") do |config|
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+end
+# il indique que pour accéder au por 80 de notre VM, il faut accéder au port 8080 de la machine host. https://developer.hashicorp.com/vagrant/docs/networking/forwarded_ports
+
+
+# on peut definir un reseau privé : https://developer.hashicorp.com/vagrant/docs/networking/private_network
+# cela permet d'accéder à ma vm depuis ma machine host en indiquant simplement l'ip privé de ma vm. cependans les autres machine ême sur le même réseaux que moi ne pourrront pas y accéder car la définition d'un reseau privé sigifi que seul l'hote peux y accéder et non pas un autre pc.
+# on peut le definir en statique ou en dynamique (DHCP)
+Vagrant.configure("2") do |config|
+  config.vm.network "private_network", type: "dhcp" # dynamique
+  #config.vm.network "private_network", ip: "192.168.50.4" # static
+end
+
+
+# on peut definir un reseau public : https://developer.hashicorp.com/vagrant/docs/networking/public_network
+# cela permets à d'autre pc présent le mêm réseaux que moi (interface lan , box orange), d'accéder à ma vm 
+
+# si on le défini en static, alors se rassurer que l'ip est disponible et non utilisé déjà 
+Vagrant.configure("2") do |config|
+  config.vm.network "public_network",
+    use_dhcp_assigned_default_route: true # dynamic
+	#ip: "192.168.0.17" # static 
+end
+
+
+# tp on va créer un serveur web et l'exposer en reseau privé static 10.0.0.1
+cd ..
+mkdir vagrt4 
+cd vagrt4
+vagrant init
+
+# modifier manuellement le fichier 
+"""
+RAM = 2048
+CPU = 2
+IP = "10.0.0.10"
+Vagrant.configure("2") do |config|
+  config.vm.box = "geerlingguy/centos7"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = RAM # 2048
+    v.cpus = CPU # 2
+  end
+  config.vm.network "private_network", ip: IP
+end
+"""
+
+vagrant validate
+vagrant up
+vagrant ssh
+
+# on install nginx 
+sudo yum install nginx -y
+sudo systemctl status nginx 
+sudo systemctl start nginx 
+sudo systemctl status nginx 
+
+curl 127.0.0.1
+#accéder au 10.0.0.10 sur chrome de ma machine host pour vérifier
+exit 
+vagrant destroy -f 
+
+
+
+
+### vagrt5
+# faire du multi machine 
+## créer et deployer plusieurs machines virtuel avec un seul fichier vagrantfile 
+https://developer.hashicorp.com/vagrant/docs/multi-machine
+
+# tp : deployer un vagrantfile qui va créer 3 vm avec les caractéristiques :
+cpu : 1
+ram : 1 Go
+VM1: lb , ip 10.0.0.10 # la vm1 sera nommé "lb" et exposé sur le reseau privé au 10.0.0.10 . on pourra y accéder en faisant vagrant ssh lb ou ssh vagrant@10.0.0.10 password vagrant
+VM2: web1 , ip 10.0.0.11
+VM3: web2 , ip 10.0.0.12
+
+cd ..
+mkdir vagrt5 
+cd vagrt5
+vagrant init
+
+# modifier manuellement le fichier 
+"""
+RAM = 1024
+CPU = 1
+Vagrant.configure("2") do |config|
+  # configuration VM1 Lod Balancer
+  config.vm.define "lb" do |lb|
+    lb.vm.box = "geerlingguy/centos7"
+    lb.vm.provider "virtualbox" do |v|
+      v.memory = RAM 
+      v.cpus = CPU 
+    end
+    lb.vm.network "private_network", ip: "10.0.0.10"
+  end
+  
+  # configuration VM2 web1
+  config.vm.define "web1" do |web1|
+    web1.vm.box = "geerlingguy/centos7"
+    web1.vm.provider "virtualbox" do |v|
+      v.memory = RAM 
+      v.cpus = CPU 
+    end
+    web1.vm.network "private_network", ip: "10.0.0.11"
+  end
+  
+  # configuration VM2 web2
+  config.vm.define "web2" do |web2|
+    web2.vm.box = "geerlingguy/centos7"
+    web2.vm.provider "virtualbox" do |v|
+      v.memory = RAM 
+      v.cpus = CPU 
+    end
+    web2.vm.network "private_network", ip: "10.0.0.12"
+  end
+  
+end
+"""
+
+ou
+
+"""
+RAM = 1024
+CPU = 1
+Vagrant.configure("2") do |config|
+  # configuration VM1 Lod Balancer
+  config.vm.define "lb" do |lb|
+    lb.vm.box = "ubuntu/xenial64"
+    lb.vm.network "private_network", ip: "10.0.0.10"
+  end
+  config.vm.provider "virtualbox" do |v|
+    v.memory = RAM 
+    v.cpus = CPU 
+  end
+  
+  # configuration VM2 web1
+  config.vm.define "web1" do |web1|
+    web1.vm.box = "ubuntu/xenial64"
+    web1.vm.network "private_network", ip: "10.0.0.11"
+  end
+  config.vm.provider "virtualbox" do |v|
+    v.memory = RAM 
+    v.cpus = CPU 
+  end
+  
+  # configuration VM2 web2
+  config.vm.define "web2" do |web2|
+    web2.vm.box = "ubuntu/xenial64"
+    web2.vm.network "private_network", ip: "10.0.0.12"
+  end
+  config.vm.provider "virtualbox" do |v|
+    v.memory = RAM 
+    v.cpus = CPU 
+  end
+  
+end
+"""
+
+vagrant validate
+vagrant up
+vagrant status 
+vagrant ssh lb # ou web1 ou web2
+exit
+vagrant destroy -f 
+
+
+
+
+
+### vagrt6 
+## les plugins de vagrant disponible sui rubygems
+
+vagrant plugin -help 
+
+cd ..
+mkdir vagrt6 
+cd vagrt6
+vagrant init
+
+# modifier le vagrantfile pour qu'il les 3 VM comme dans vagrt5 
+# ajouter le plugin "vagrant-hostsupdater" qui va permettre de modifier les fichiers /etc/host dans chacune de nos vm pour y ecrire nos hostname et nos ip 
+
+# installation du plungin : voir sur le gith du plungin via rubygems : https://rubygems.org/gems/vagrant-hostsupdater 
+https://github.com/agiledivider/vagrant-hostsupdater
+
+vagrant plugin install vagrant-hostsupdater
+
+# on récupère le contenu de vagrt5 et on y ajoute :
+...in vagrantfile ...
+	config.vm.hostname = "www.testing.de"
+...
+
+vagrant validate
+vagrant up
+vagrant status 
+vagrant ssh lb # ou web1 ou web2
+exit
+vagrant destroy -f 
+
+
+
+
+### vagrt7
+## synchronisation de fichiers entre plusieurd machine (plusieurs VM ou entre VM et machine host)
+# on utilisera synced_folder 
+# https://developer.hashicorp.com/vagrant/docs/synced-folders/basic_usage
+Vagrant.configure("2") do |config|
+  # other config here
+  config.vm.synced_folder "/lien_dossier_source_host/", "/lien_dossier_de_destination_vm/"
+end
+
+## pour faire une simple copie de fichier de l'host vers la vm sans synchroniser 
+config.vm.provision "file", source: "lien_fichier_source_host.config", destination: "lien_vm_destination.config" 
+# ou copier un dossier 
+config.vm.provision "file", source: "/lien_fichier_source_host/", destination: "/lien_vm_destination/" 
+
+# tp de vagrt7 :
+# on va creer une VM avec :
+- cpu : 1
+- RAM : 1 Go
+- ip fixe : 10.0.0.10
+- image de base : mon image crééé en vagrt2 
+- recupérer l'application static-website sur << https://github.com/diranetafen/static-website-example >> à synchroniser dans notre dossier vagrt7
+- monter le code de l'application dans le dossier /usr/share/nginx/html/ de la VM
+- vérifier que le site récupéré depuis github est bien accessible 
+- arreter la VM 
+
+# tp 
+cd ..
+mkdir vagrt7
+cd vagrt7
+vagrant init
+
+git clone https://github.com/diranetafen/static-website-example.git
+
+
+vagrant validate
+vagrant up
+vagrant status 
+vagrant ssh 
+
+ls /usr/share/nginx/html/
+sudo systemctl status nginx
+
+# ouvrir chrome en monter sur 10.0.0.10 pour voir si le site web s'affiche 
+# Maintenant, l'utilité de la synchronistion,est que quans je modifie un fichier sur ma machine host, cela se met à jour automatiquement dans la VM et donc sur le site affiche au 10.0.0.10
+
+
+exit
+vagrant destroy -f 
+
+
+
+
+##### vagrt8
+## provisioner : shell provionning , ansible, bash shell, ... etc ...
+## lancer des commandes sur notre vm après installation 
+## ne pas confondre provisionner (intervien après la création de la VM) et provider (intervien avant la création de la VM) 
+
+# les différents cas de lancement du proviionning :
+- vagrant up # lors de la création de la VM, le provisionning est fait automatiquemlent s'il est défini dans le vagrantfile 
+
+- vagrant up --provision # quand la VM existe déjà (déjà créée) et on veux la mettre à jour puis on souhaite forcer le provisionning  lors de la mise à jour
+
+- vagrant provision # si on veut lancer uniquement le provisionning sans relancer les machines 
+
+- vagrant reload --provision # lorsqu'on recharge la machine et on souhaite forcer le provisionning 
+
+
+## on va utiliser le shell provisionner : https://developer.hashicorp.com/vagrant/docs/provisioning/shell
+"""
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", # on spécifie qu'on veut utiliser le provisionner shell
+    inline: "echo Hello, World" # on écrit la commande shell à exécuter 
+end
+"""
+ou 
+
+"""
+# on écrit le script à exécuter qui peu contenir plusieurs lignes de commandes dans un objet nommé script 
+$script = <<-SCRIPT
+echo I am provisioning...
+date > /etc/vagrant_provisioned_at
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", inline: $script # on passe l'objet script en argument du inline pour qu'il exécute les commandes conetenu dans script 
+end
+"""
+ou
+
+"""
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", path: "script.sh" # s'il y a un fichier externe, on mets le lien du fichier
+  #config.vm.provision "shell", path: "https://example.com/provisioner.sh" # ou si c'est un lien github, on mets et il ira télécharger pour exécuter 
+end
+"""
+ou
+
+"""
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell" do |s|
+    s.inline = "echo $1"      # argument en position 1
+    s.args   = "'hello, world!'" # valeur de l'argument , ici, il y a un argument 
+  end
+end
+"""
+ou
+
+"""
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell" do |s|
+    s.inline = "echo $1" # argument en position 1
+    s.args   = ["hello, world!"] # liste des arguments , on les mets en liste, ici, il y a 2 arguments
+  end
+end
+"""
+
+
+# tp 
+cd ..
+mkdir vagrt8
+cd vagrt8
+vagrant init
+
+git clone https://github.com/diranetafen/static-website-example.git
+
+
+vagrant validate
+vagrant up
+vagrant status 
+vagrant ssh 
+
+# tester les ip pour voir si les message des site s'affiches 
+
+exit
+vagrant destroy -f 
+
+
+
+
+### vagrt9
+## autres provisionneur : ansible, chef, puppet, docker, salt, ...
+
+# tp avec ansible_locale : https://developer.hashicorp.com/vagrant/docs/provisioning/ansible_local
+# utiliser le provisionner ansible-locale pour exécuter un playbook.yml ansible que nous allos écrire. ce playbook va installer nginx et va le démarrer sur notre vm 
+
+
+# PS : pour éviter des erreur de type "end kernel panic - not syncing : attempted to kill the idle task" il faut choisir au minimum CPU >= 2
+
+# tp 
+cd ..
+mkdir vagrt9
+cd vagrt9
+vagrant init
+
+
+
+vagrant validate
+vagrant up
+vagrant status 
+vagrant ssh 
+
+# tester les ip pour voir si les message des site s'affiches 
+# tester ansible dans le ssh 
+ansible 
+
+exit ou logout
+
+
+vagrant destroy -f 
+
+
+
+
+
+
+### vagrt10
+## workflow d'installation de jenking en utilisand ansible dans vagrant 
+# pour installer jenkins, il faudra :
+- installer une VM : centos
+- installer Docker en utilisant un role ansible ou shell
+- recupérer un docker-compose et le builder en faisant docker-compose up 
+- nous allons écrire le docker-composer à builder 
+
+
+cd ..
+mkdir vagrt10
+cd vagrt10
+vagrant init
+
+vagrant validate
+vagrant up
+vagrant status 
+vagrant ssh 
+
+
+
+### vagrt11
+## workflow d'installation de jenking en utilisand ansible dans vagrant 
+# pour installer jenkins, il faudra :
+- installer une VM : centos
+- installer Docker en utilisant un role ansible ou shell
+- recupérer un docker-compose et le builder en faisant docker-compose up 
+- nous allons écrire le docker-composer à builder 
+
+
+cd ..
+mkdir vagrt11
+cd vagrt11
+vagrant init
+
+vagrant validate
+vagrant up
+vagrant status 
+vagrant ssh 
+

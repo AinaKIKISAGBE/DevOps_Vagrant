@@ -1,0 +1,19 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+RAM = 1024
+CPU = 1
+IP = "10.0.0.10"
+Vagrant.configure("2") do |config|
+  config.vm.box = "ainakikisagbe/nginx"
+  config.vm.box_version = "1.0"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = RAM # 2048
+    v.cpus = CPU # 2
+  end
+  config.vm.network "private_network", ip: IP
+  config.vm.hostname = "nginx"
+  config.vm.synced_folder "static-website-example/", "/usr/share/nginx/html/" # on l'envoie vers ce dossier car on sait que c'est dans ce dossier que nginx part lire le site à afficher pour les ancienne version de nginx, si on avait installé une version plus récente de nginx, le dossier serait "/var/www/html/"
+  
+end

@@ -1,0 +1,50 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+RAM = 1024
+CPU = 1
+Vagrant.configure("2") do |config|
+  # configuration VM1 Lod Balancer
+  config.vm.define "lb" do |lb|
+    lb.vm.box = "geerlingguy/centos7"
+    lb.vm.provider "virtualbox" do |v|
+      v.memory = RAM 
+      v.cpus = CPU 
+    end
+    lb.vm.network "private_network", ip: "10.0.0.10"
+	lb.vm.provision: shell do |shell|
+	  shell.path = "https://raw.githubusercontent.com/PacktPublishing/Hands-On-DevOps-with-Vagrant/master/Chapter07/lb.sh" # script_in_lb.png
+	  #shell.args = "1"
+	end
+	
+  end
+  
+  # configuration VM2 web1
+  config.vm.define "web1" do |web1|
+    web1.vm.box = "geerlingguy/centos7"
+    web1.vm.provider "virtualbox" do |v|
+      v.memory = RAM 
+      v.cpus = CPU 
+    end
+    web1.vm.network "private_network", ip: "10.0.0.11"
+	web1.vm.provision: shell do |shell|
+	  shell.path = "https://raw.githubusercontent.com/PacktPublishing/Hands-On-DevOps-with-Vagrant/master/Chapter07/web.sh" # #raw.githubusercontent.com/packtpublishing/hands-on-devops-with-vagrant/master/script.sh # script_in_web1.png
+	  shell.args = "lolo_1"
+	end
+  end
+  
+  # configuration VM2 web2
+  config.vm.define "web2" do |web2|
+    web2.vm.box = "geerlingguy/centos7"
+    web2.vm.provider "virtualbox" do |v|
+      v.memory = RAM 
+      v.cpus = CPU 
+    end
+    web2.vm.network "private_network", ip: "10.0.0.12"
+	web2.vm.provision: shell do |shell|
+	  shell.path = "https://raw.githubusercontent.com/PacktPublishing/Hands-On-DevOps-with-Vagrant/master/Chapter07/web.sh" # script_in_web2.png
+	  shell.args = "lola_2"
+	end
+  end
+  
+end

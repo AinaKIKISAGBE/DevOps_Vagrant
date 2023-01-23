@@ -1,0 +1,29 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+RAM = 1024
+CPU = 2 # pour éviter des erreur de type "end kernel panic - not syncing : attempted to kill the idle task" il faut choisir au minimum CPU >= 2
+IP = "10.0.0.10"
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/xenial64" # "geerlingguy/centos7" "ubuntu/xenial64" "bento/ubuntu-16.04"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = RAM 
+    v.cpus = CPU 
+  end
+  config.vm.network "private_network", ip: IP
+  
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.playbook = "my_vagrant_playbook.yaml"
+	ansible.install = true # installer ansible sur la VM 
+	#ansible.install_mode = "yum"
+    ansible.install_mode = "pip" # je peux qu'il l'installe en utilisant pip 
+	ansible.pip_install_cmd = "curl https://bootstrap.pypa.io/pip/2.7/get-pip.py | sudo python" 
+    # ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }	
+    #ansible.pip_install_cmd = "curl https://bootstrap.pypa.io/pip/3.5/get-pip.py | sudo python" 
+	# "https_proxy=http://your.proxy.server:port curl -s https://bootstrap.pypa.io/get-pip.py | sudo https_proxy=http/your.proxy.server:port python"
+    #ansible.version = "2.2.1.0"
+  end
+  
+  
+end
