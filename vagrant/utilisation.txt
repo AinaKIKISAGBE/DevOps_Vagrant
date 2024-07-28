@@ -1,4 +1,4 @@
-
+ord 
 
 ##### vagrt1
 
@@ -41,7 +41,8 @@ vagrant status
 vagrant global-status 
 
 # on va essayer de s'y connecter en faisant vagrant ssh, par defaut il a déjà créé un utilisateur vagrant en utilisant un tunel de connection clé privé clé public
-
+# user: vagrant   
+# password: vagrant
 vagrant ssh 
 
 # on peut se déconnecter en faisant 
